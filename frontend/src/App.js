@@ -14,7 +14,7 @@ import AdminPanel, { AdminLogin } from './pages/AdminPanel';
 
 import { INIT_BIDS, INIT_TXNS } from './data/gameData';
 
-var API = 'https://sattamatka-deepak-hy1n.onrender.com';
+var API = 'https://aditya-nh9i.onrender.com';
 
 function apiCall(path, method, body) {
   if (!method) method = 'GET';
