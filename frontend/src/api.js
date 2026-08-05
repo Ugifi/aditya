@@ -1,4 +1,4 @@
-const API_URL = 'https://sattamatka-deepak-hy1n.onrender.com/api';
+const API_URL = 'https://aditya-nh9i.onrender.com/api';
 
 const getHeaders = () => ({
   'Content-Type': 'application/json',
