@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_URL = 'https://sattamatka-deepak-hy1n.onrender.com';
+const API_URL = 'https://aditya-nh9i.onrender.com';
 
 // ── FORGOT PASSWORD MODAL ─────────────────────────────────────────────────────
 function ForgotPasswordModal({ onClose }) {
