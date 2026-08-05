@@ -18,7 +18,7 @@ export default function Drawer({ user, onClose, onNav, onLogout, apiCall }) {
     }).catch(() => {});
   }, [apiCall]);
 
-  const API_URL = 'https://sattamatka-deepak-hy1n.onrender.com';
+  const API_URL = 'https://aditya-nh9i.onrender.com';
   const defaultAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Lucky&backgroundColor=ffcc00";
 
   const getAvatarUrl = () => {
