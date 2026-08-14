@@ -136,7 +136,7 @@ function BlueDrawer({ user, onClose, onNav, onLogout, wallet }) {
         {/* Header */}
         <div style={{ background: 'linear-gradient(135deg, #FF6B00, #FF9500)', padding: '20px 16px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid rgba(255,107,0,0.2)' }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <img src="/yono.png" alt="avatar" style={{ width: 50, height: 50, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.6)', flexShrink: 0, objectFit: 'cover' }} />
+            <img src="/1.png" alt="avatar" style={{ width: 50, height: 50, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.6)', flexShrink: 0, objectFit: 'cover' }} />
             <div>
               <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 2 }}>{user?.name || 'Player'}</div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)' }}>{user?.mobile || ''}</div>
@@ -250,7 +250,7 @@ function ProfileScreen({ user, showToast }) {
   return (
     <div style={{ background: '#f2ede6', minHeight: '100vh', paddingBottom: 80, fontFamily: "'Poppins', sans-serif" }}>
       <div style={{ background: 'linear-gradient(135deg, #FF6B00, #FF9500)', padding: '24px 20px', textAlign: 'center', borderBottom: '1px solid rgba(255,107,0,0.15)' }}>
-        <img src="/yono.png" alt="avatar" style={{ width: 60, height: 60, borderRadius: '40%', border: '3px solid rgba(255,255,255,0.6)', objectFit: 'cover', marginBottom: 8 }} />
+        <img src="/1.png" alt="avatar" style={{ width: 60, height: 60, borderRadius: '40%', border: '3px solid rgba(255,255,255,0.6)', objectFit: 'cover', marginBottom: 8 }} />
         <div style={{ color: '#fff', fontWeight: 800, fontSize: 18 }}>{user?.name || 'User'}</div>
         <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 2 }}>📱 {user?.mobile || '—'}</div>
       </div>
@@ -729,7 +729,7 @@ export default function App() {
           {isSubPage
             ? <span className="brand">{navTitle || 'BACK'}</span>
             : <img
-                src="/yono.png"
+                src="/1.png"
                 alt={siteName}
                 style={{ height: 36, width: 'auto', objectFit: 'contain' }}
                 onError={e => { e.currentTarget.style.display = 'none'; }}
