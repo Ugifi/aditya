@@ -110,13 +110,36 @@ function generateSPMotorCombinations(digits) {
 }
 
 // ── UI Helper Components (Scroll Fix) ──
-function AmtInput({ amt, setAmt, chips, label = 'Bid Amount (Min ₹10)' }) {
+function AmtInput({ amt, setAmt, chips, label = 'Bid Amount (Min ₹2)' }) {
+  const handleChipClick = (c) => {
+    const current = Number(amt) || 0;
+    const newAmt = Math.min(current + c, 10000);
+    setAmt(String(newAmt));
+  };
   return (
     <div className="bf-fg">
       <label className="bf-label">{label}</label>
-      <input className="bf-input" type="number" placeholder="₹0" value={amt} onChange={e => setAmt(e.target.value)} inputMode="numeric" autoComplete="off" />
+      <input
+        className="bf-input"
+        type="number"
+        placeholder="₹0"
+        value={amt}
+        onChange={e => {
+          const v = Math.min(Number(e.target.value.replace(/\D/g,'')), 10000);
+          setAmt(v ? String(v) : '');
+        }}
+        inputMode="numeric"
+        autoComplete="off"
+        min={2}
+        max={10000}
+      />
       <div className="bf-chips-row">
-        {chips.map(c => (<div key={c} className={`bf-chip${amt === String(c) ? ' active' : ''}`} onClick={() => setAmt(String(c))}>₹{c}</div>))}
+        {chips.map(c => (
+          <div key={c} className="bf-chip" onClick={() => handleChipClick(c)}>+₹{c}</div>
+        ))}
+        {amt && Number(amt) > 0 && (
+          <div className="bf-chip" style={{background:'rgba(229,57,53,0.1)', color:'#e53935', borderColor:'rgba(229,57,53,0.3)'}} onClick={() => setAmt('')}>✕ Clear</div>
+        )}
       </div>
     </div>
   );
@@ -234,7 +257,7 @@ function FamilyJodiSection({ amt, setAmt, chips, onSubmit, submitting, openClose
   const handleFamilySelect = (fk) => { setSelectedFamily(fk); setSelectedJodis([...JODI_FAMILIES[fk]]); setAmt(''); };
   const toggleJodi = (j) => { setSelectedJodis(prev => prev.includes(j) ? prev.filter(x => x !== j) : [...prev, j]); };
   const toggleAll = () => { if (selectedJodis.length === familyJodis.length) { setSelectedJodis([]); } else { setSelectedJodis([...familyJodis]); } };
-  const handleSubmit = async () => { if (!selectedFamily || selectedJodis.length === 0 || !amt || Number(amt) < 10) return; const betsToSubmit = selectedJodis.map(j => ({ num: j, amt: Number(amt) })); await onSubmit({ __bulk: true, numbers: betsToSubmit, totalAmt, session: openClose }); };
+  const handleSubmit = async () => { if (!selectedFamily || selectedJodis.length === 0 || !amt || Number(amt) < 2) return; const betsToSubmit = selectedJodis.map(j => ({ num: j, amt: Number(amt) })); await onSubmit({ __bulk: true, numbers: betsToSubmit, totalAmt, session: openClose }); };
 
   return <>
     <div className="bf-fg">
@@ -278,7 +301,7 @@ function FamilyPanaSection({ num, setNum, amt, setAmt, chips, openClose, onSubmi
   const totalLines  = familyPanas.length;
   const totalAmt    = totalLines * Number(amt || 0);
 
-  const handleSubmit = async () => { if (!foundFamily || !amt || Number(amt) < 10) return; const betsToSubmit = familyPanas.map(p => ({ num: p, amt: Number(amt) })); await onSubmit({ __bulk: true, numbers: betsToSubmit, totalAmt, session: openClose }); };
+  const handleSubmit = async () => { if (!foundFamily || !amt || Number(amt) < 2) return; const betsToSubmit = familyPanas.map(p => ({ num: p, amt: Number(amt) })); await onSubmit({ __bulk: true, numbers: betsToSubmit, totalAmt, session: openClose }); };
 
   return <>
     <div className="bf-fg">
@@ -316,8 +339,7 @@ export default function BetForm({ game, gameType, wallet, onSubmit }) {
   const [spDpDigit, setSpDpDigit] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const chips = [10, 50, 100, 200, 500];
-  const id = gameType.id;
+  const chips = [2, 5, 10, 50, 100, 200, 500,2000, 5000, 10000];  const id = gameType.id;
   const nt = gameType.numType;
 
   // ── SESSION LOGIC ────────────────────────────────────────────
@@ -368,7 +390,7 @@ const defaultSession = (openDeclared || isCloseType || isDisawarType) ? 'close' 
       setBets(b => [...b, { num: `${num}-${num2}`, amt: Number(amt) }]);
       setNum(''); setNum2(''); setAmt('');
     } else {
-      if (!num || !amt || Number(amt) < 10) return;
+      if (!num || !amt || Number(amt) < 2) return;
       setBets(b => [...b, { num, amt: Number(amt) }]);
       setNum(''); setActiveN(null); setAmt('');
     }
@@ -404,7 +426,7 @@ if (!isDisawarType && openDeclared && openClose === 'open') {      alert('Open r
         if (!num || !num2 || !amt || Number(amt) < 10) { setSubmitting(false); return; }
         await onSubmit({ number: `${num}|${num2}`, amount: Number(amt), ...commonData });
       } else {
-        if (!num || !amt || Number(amt) < 10) { setSubmitting(false); return; }
+        if (!num || !amt || Number(amt) < 2) { setSubmitting(false); return; }
         await onSubmit({ number: num, amount: Number(amt), ...commonData });
       }
     } finally {
@@ -502,15 +524,11 @@ const SessionToggle = () => {
         <div className="bf-desc-box">{gameType.desc} &nbsp;— Multiplier: <strong>{gameType.win}x</strong></div>
 
         {!isDisawarType && id !== 'jodi' && id !== 'jodi_bulk' && id !== 'jodi_digit' && id !== 'red_jodi' && id !== 'family_pana' && id !== 'family_jodi' && id !== 'crossing_jodi' && id !== 'single_digit_close' && <SessionToggle />}
-{(id === 'single_digit' || id === 'single_digit_close') && <><div className="bf-fg"><label className="bf-label">Pick a Digit (0–9)</label><NumGrid selected={num} onSelect={v => { setNum(v); setActiveN(Number(v)); }} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><WinInfo/><PlaceBtn/></>}        {id === 'single_digit_bulk' && <><div className="bf-fg"><label className="bf-label">Pick Digits</label><NumGrid selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips} label="Bid Amount (Min ₹10)"/><AddBtn label="+ Add Digit"/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}
-        {id === 'jodi_digit'        && <><div className="bf-fg"><label className="bf-label">Pick Jodi (00–99)</label><JodiGrid selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><WinInfo/><PlaceBtn/></>}
-        {id === 'jodi_bulk'         && <><div className="bf-fg"><label className="bf-label">Pick Jodi</label><JodiGrid selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><AddBtn label="+ Add Jodi"/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}
-        {id === 'single_pana'       && <><div className="bf-fg"><label className="bf-label">Pick Single Pana</label><PanaGrid panas={SINGLE_PANAS} selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><WinInfo/><PlaceBtn/></>}
-        {id === 'single_pana_bulk'  && <><div className="bf-fg"><label className="bf-label">Pick Single Pana</label><PanaGrid panas={SINGLE_PANAS} selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><AddBtn/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}
-        {id === 'double_pana'       && <><div className="bf-fg"><label className="bf-label">Pick Double Pana</label><PanaGrid panas={DOUBLE_PANAS} selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><WinInfo/><PlaceBtn/></>}
-        {id === 'double_pana_bulk'  && <><div className="bf-fg"><label className="bf-label">Pick Double Pana</label><PanaGrid panas={DOUBLE_PANAS} selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><AddBtn/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}
-        {id === 'triple_pana'       && <><div className="bf-fg"><label className="bf-label">Pick Triple Pana</label><PanaGrid panas={TRIPLE_PANAS} selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><WinInfo/><PlaceBtn/></>}
-        
+{(id === 'single_digit' || id === 'single_digit_close') && <><div className="bf-fg"><label className="bf-label">Pick a Digit (0–9)</label><NumGrid selected={num} onSelect={v => { setNum(v); setActiveN(Number(v)); }} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><WinInfo/><AddBtn label="+ Add Digit"/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}        {id === 'single_digit_bulk' && <><div className="bf-fg"><label className="bf-label">Pick Digits</label><NumGrid selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips} label="Bid Amount (Min ₹10)"/><AddBtn label="+ Add Digit"/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}
+{id === 'jodi_digit' && <><div className="bf-fg"><label className="bf-label">Pick Jodi (00–99)</label><JodiGrid selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><WinInfo/><AddBtn label="+ Add Jodi"/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}        {id === 'jodi_bulk'         && <><div className="bf-fg"><label className="bf-label">Pick Jodi</label><JodiGrid selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><AddBtn label="+ Add Jodi"/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}
+{id === 'single_pana' && <><div className="bf-fg"><label className="bf-label">Pick Single Pana</label><PanaGrid panas={SINGLE_PANAS} selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><WinInfo/><AddBtn label="+ Add Pana"/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}        {id === 'single_pana_bulk'  && <><div className="bf-fg"><label className="bf-label">Pick Single Pana</label><PanaGrid panas={SINGLE_PANAS} selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><AddBtn/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}
+{id === 'double_pana' && <><div className="bf-fg"><label className="bf-label">Pick Double Pana</label><PanaGrid panas={DOUBLE_PANAS} selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><WinInfo/><AddBtn label="+ Add Pana"/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}        {id === 'double_pana_bulk'  && <><div className="bf-fg"><label className="bf-label">Pick Double Pana</label><PanaGrid panas={DOUBLE_PANAS} selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><AddBtn/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}
+{id === 'triple_pana' && <><div className="bf-fg"><label className="bf-label">Pick Triple Pana</label><PanaGrid panas={TRIPLE_PANAS} selected={num} onSelect={setNum} /></div><AmtInput amt={amt} setAmt={setAmt} chips={chips}/><WinInfo/><AddBtn label="+ Add Pana"/><BulkTable/>{bets.length > 0 && <PlaceAllBtn/>}</>}        
         {/* FAMILY PANA & JODI */}
         {id === 'family_pana' && <FamilyPanaSection num={num} setNum={setNum} amt={amt} setAmt={setAmt} chips={chips} openClose={openClose} onSubmit={onSubmit} submitting={submitting} />}
         {id === 'family_jodi' && <FamilyJodiSection amt={amt} setAmt={setAmt} chips={chips} onSubmit={onSubmit} submitting={submitting} openClose={openClose} />}
@@ -884,11 +902,40 @@ const SessionToggle = () => {
             {generated.length > 0 && <>
               <div className="bf-desc-box" style={{ background: 'rgba(255,107,0,0.08)', color: '#E65C00', border: '1px solid rgba(230,92,0,0.4)' }}>🎯 <strong>{generated.length} Jodis</strong> generate hongi</div>
               <div className="bf-fg"><label className="bf-label">📋 Generated Jodis</label><div className="bf-jodi-scroll"><div className="bf-jodi-grid">{generated.map(j => (<div key={j} className="bf-jchip active" style={{ cursor: 'default' }}>{j}</div>))}</div></div></div>
-              <div className="bf-fg"><label className="bf-label">💰 Amount per Jodi (Min ₹10)</label><input className="bf-input" type="number" placeholder="₹0" value={amt} onChange={e => setAmt(e.target.value)} /><div className="bf-chips-row">{chips.map(c => (<div key={c} className={`bf-chip${amt === String(c) ? ' active' : ''}`} onClick={() => setAmt(String(c))}>₹{c}</div>))}</div></div>
-              {Number(amt) >= 10 && <>
+              <div className="bf-fg"><label className="bf-label">💰 Amount per Jodi (Min ₹10)</label><input className="bf-input" type="number" placeholder="₹0" value={amt} onChange={e => setAmt(e.target.value)} /><div className="bf-chips-row">
+  {chips.map(c => (
+    <div key={c} className="bf-chip" onClick={() => {
+      const cur = Number(amt) || 0;
+      setAmt(String(Math.min(cur + c, 10000)));
+    }}>+₹{c}</div>
+  ))}
+  {amt && Number(amt) > 0 && (
+    <div className="bf-chip" style={{background:'rgba(229,57,53,0.1)', color:'#e53935', borderColor:'rgba(229,57,53,0.3)'}} onClick={() => setAmt('')}>✕ Clear</div>
+  )}
+</div></div>
+              {Number(amt) >= 2 && <>
                 <div className="bf-infobox">📊 <strong>{generated.length} jodis</strong> × ₹<strong>{amt}</strong> = Total: <strong>₹{totalGenAmt.toLocaleString()}</strong></div>
-                <button className="bf-place-btn" disabled={submitting} style={{ opacity: submitting ? 0.6 : 1, cursor: submitting ? 'not-allowed' : 'pointer' }} onClick={async () => { if (submitting) return; setSubmitting(true); try { await onSubmit({ __bulk: true, numbers: generated.map(j => ({ num: j, amt: Number(amt) })), totalAmt: totalGenAmt, session: openClose }); } finally { setSubmitting(false); } }}>{submitting ? '⏳ Placing...' : `🎯 Place All — ₹${totalGenAmt.toLocaleString()}`}</button>
+                <button onClick={() => {
+                  if (!amt || Number(amt) < 2) return;
+                  setBets(b => [...b, ...generated.map(j => ({ num: j, amt: Number(amt) }))]);
+                  setNum(''); setNum2(''); setAmt('');
+                }} className="bf-add-btn">+ Add to List</button>
               </>}
+              <BulkTable/>
+              {bets.length > 0 && (
+                <button className="bf-place-btn" disabled={submitting}
+                  style={{ opacity: submitting ? 0.6 : 1, cursor: submitting ? 'not-allowed' : 'pointer' }}
+                  onClick={async () => {
+                    if (submitting) return;
+                    setSubmitting(true);
+                    try {
+                      const total = bets.reduce((a,b) => a + b.amt, 0);
+                      await onSubmit({ __bulk: true, numbers: bets, totalAmt: total, session: openClose });
+                    } finally { setSubmitting(false); }
+                  }}>
+                  {submitting ? '⏳ Placing...' : `🎯 Place All — ₹${bets.reduce((a,b)=>a+b.amt,0).toLocaleString()}`}
+                </button>
+              )}
             </>}
           </>;
         })()}
