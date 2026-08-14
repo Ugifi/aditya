@@ -1198,7 +1198,7 @@ export function SupportPage({ apiCall, user }) {
         `}</style>
         <div style={{ display: 'flex', alignItems: 'center', gap: 50, justifyContent: 'center' }}>
           <div style={{ position: 'relative', flexShrink: 0 }}>
-            <img src="/th.png" alt="avatar" style={{ width: 90, height: 90, borderRadius: '0%', border: '2.5px solid rgba(255,255,255,0.6)', objectFit: 'cover', animation: 'avatarGlow 2.5s ease-in-out infinite', boxShadow: '0 0 18px rgba(255,255,255,0.25)' }} />
+            <img src="/1.png" alt="avatar" style={{ width: 90, height: 90, borderRadius: '0%', border: '2.5px solid rgba(255,255,255,0.6)', objectFit: 'cover', animation: 'avatarGlow 2.5s ease-in-out infinite', boxShadow: '0 0 18px rgba(255,255,255,0.25)' }} />
             <div style={{ position: 'absolute', bottom: 4, right: 4, width: 14, height: 14, background: '#00cc44', borderRadius: '50%', border: '2px solid #FF6B00', animation: 'dotBlink 1.5s ease-in-out infinite' }} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
