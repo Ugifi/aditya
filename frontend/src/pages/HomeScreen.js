@@ -174,9 +174,9 @@ export default function HomeScreen({ wallet, onAdd, onWith, onPlay, navigate, ap
           g.game_category?.toLowerCase() !== 'starline'
         );
 
-        setGames(main);
-        setStarlineGames(starline);
-        setDisawarGames(disawar.length > 0 ? disawar : allGames.filter(g => g.name?.toLowerCase().includes('disawar')));
+        setGames(sortByCloseTime(main));
+        setStarlineGames(sortByCloseTime(starline));
+        setDisawarGames(sortByCloseTime(disawar.length > 0 ? disawar : allGames.filter(g => g.name?.toLowerCase().includes('disawar'))));
       } catch (err) {
         setGames([{ id: 1, name: 'TIME BAZAR', open_time: '01:00:00', close_time: '02:00:00', status: 'closed', result: null }]);
         setStarlineGames([{ id: 2, name: 'STARLINE MORNING', open_time: '09:00:00', close_time: '09:30:00', status: 'open', result: null }]);
@@ -354,6 +354,18 @@ export default function HomeScreen({ wallet, onAdd, onWith, onPlay, navigate, ap
     localStorage.removeItem('mk_admin_token');
     window.location.href = '/?admin=1';
   };
+
+const sortByCloseTime = (gamesList) => {
+  return [...gamesList].sort((a, b) => {
+    const toMinutes = (t) => {
+      if (!t) return 9999;
+      const [h, m] = t.split(':').map(Number);
+      const adjusted = h < 6 ? h + 24 : h;
+      return adjusted * 60 + m;
+    };
+    return toMinutes(a.close_time) - toMinutes(b.close_time);
+  });
+};
 
   const getGameIcon = (name) => {
     if (!name) return '🎰';
@@ -633,17 +645,15 @@ export default function HomeScreen({ wallet, onAdd, onWith, onPlay, navigate, ap
               <span style={{ fontSize: 13, fontWeight: 900 }}>
                 {status.canPlay ? '▶ PLAY' : 'CLOSED'}
               </span>
-              {status.canPlay && (
-                <span style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: 'rgba(255,255,255,0.92)',
-                  fontFamily: "'Orbitron', monospace",
-                  letterSpacing: 0.5,
-                }}>
-                  {timerStr}
-                </span>
-              )}
+              <span style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: 'rgba(255,255,255,0.92)',
+                fontFamily: "'Orbitron', monospace",
+                letterSpacing: 0.5,
+              }}>
+                {formatTime(g.close_time)}
+              </span>
             </button>
           </div>
 
